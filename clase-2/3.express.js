@@ -39,7 +39,7 @@ app.get('/pokemon/ditto', (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send('Not Found');
+  res.status(404).send('<h1>Not Found 404</h1>');
 });
 
 app.listen(PORT, () => {
