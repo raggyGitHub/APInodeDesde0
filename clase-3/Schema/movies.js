@@ -12,10 +12,23 @@ const movieSchema = z.object({
   duration: z.number().int().positive(),
   rate: z.number().min(0).max(10),
   poster: z.string().url(),
-  genre: z.array(z.enum(['terror', 'comedy', 'action', 'drama', 'sci-fi']), {
-    required_error: 'El genero es requerido',
-    invalid_type_error: 'El genero debe ser un genero valido',
-  }),
+  genre: z.array(
+    z.enum([
+      'Action',
+      'Adventure',
+      'Horror',
+      'Comedy',
+      'Drama',
+      'Fantasy',
+      'Thriller',
+      'Sci-fi',
+      'Crime',
+    ]),
+    {
+      required_error: 'El genero es requerido',
+      invalid_type_error: 'El genero debe ser un genero valido',
+    }
+  ),
 });
 
 function validateMovie(object) {

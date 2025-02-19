@@ -47,6 +47,7 @@ app.post('/movies', (req, res) => {
 
   const newMovie = {
     id: crypto.randomUUID(),
+    ...result.data,
   };
   movies.push(newMovie);
   res.status(201).json(newMovie);
