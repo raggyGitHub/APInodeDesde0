@@ -1,9 +1,23 @@
-// Recuperar todas las películas
+### Recuperar todas las películas
 GET http://localhost:1234/movies
 
+### Recuperar una película por su id
+GET http://localhost:1234/movies/c8a7d63f-3b04-44d3-9d95-8782fd7dcfaf
 
-//Recuperar una película por su id
-GET http://localhost:1234/movies/1
+### Recuperar todas las peliculas por un genero
+GET http://localhost:1234/movies?genre=Action
 
-//Recuperar todas las peliculas por un genero
-GET http://localhost:1234/movies?genre=terror
+### Crear una película
+POST http://localhost:1234/movies
+Content-Type: application/json
+
+{
+ "id": "241bf55d-b649-4109-af7c-0e6890ded3fc",
+  "title": "Sex Machine",
+  "year": 1999,
+  "director": "Quentin Tarantino",
+  "duration": 154,
+  "poster": "https://www.themoviedb.org/t/p/original/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg",
+  "genre": ["Crime", "Drama"],
+  "rate": 8.9
+}  
