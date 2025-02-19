@@ -28,7 +28,7 @@ Content-Type: application/json
 
 {
     "title": "Redemption",
-    "year": 1944
+    "year": "1944"
 }
 
 

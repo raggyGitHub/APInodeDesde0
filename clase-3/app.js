@@ -1,6 +1,7 @@
 const express = require('express'); // require --> comon js
 const movies = require('./movies.json');
 const crypto = require('node:crypto');
+const cors = require('cors');
 
 const { title } = require('node:process');
 const { validateMovie, validatePartialMovie } = require('./Schema/movies');
@@ -8,6 +9,28 @@ const { validateMovie, validatePartialMovie } = require('./Schema/movies');
 const app = express();
 app.use(express.json()); //middleware
 app.disable('x-powered-by'); //desabilita la cabecera x-powered-by
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const ACCEPTED_ORIGINS = [
+        'http://localhost:8080',
+        'http://localhost:1234',
+        'https://movies.com',
+        'https://midu.dev',
+      ];
+
+      if (ACCEPTED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
+
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+  })
+);
 
 app.get('/', (req, res) => {
   res.send('Hola mundo');
@@ -15,6 +38,7 @@ app.get('/', (req, res) => {
 
 // Todos los recursoos que esten presentes en la ruta /movies
 app.get('/movies', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
   const { genre } = req.query;
   if (genre) {
     const filteredMovies = movies.filter((movie) =>
