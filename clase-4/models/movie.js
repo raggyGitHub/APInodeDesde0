@@ -51,5 +51,16 @@ export class MovieModel {
     return updatedMovie;
   }
 
-  static async patch({ id, input }) {}
+  static async patch({ id, input }) {
+    const movieIndex = movies.findIndex((movie) => movie.id === id);
+    if (movieIndex === -1) {
+      return null;
+    }
+    const updatedMovie = {
+      ...movies[movieIndex],
+      ...input,
+    };
+    movies[movieIndex] = updatedMovie;
+    return updated;
+  }
 }
