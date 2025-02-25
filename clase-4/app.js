@@ -1,20 +1,18 @@
 import express, { json } from 'express'; // require -> commonJS
-
-import cors from 'cors';
-
-import { moviesRouter } from './routes/movies';
-import { corsMiddleware } from './middlewares/cors';
+import { moviesRouter } from './routes/movies.js';
+import { corsMiddleware } from './middlewares/cors.js';
 
 const app = express();
 app.use(json());
-app.use(corsMiddleware(acceptedOrigins()));
-app.disable('x-powered-by'); // deshabilitar el header X-Powered-By: Express
+app.disable('x-powered-by');
 
-// métodos normales: GET/HEAD/POST
-// métodos complejos: PUT/PATCH/DELETE
+app.use('/movies', moviesRouter);
 
-// CORS PRE-Flight
-// OPTIONS
+const PORT = process.env.PORT ?? 1234;
+
+app.listen(PORT, () => {
+  console.log(`server listening on port http://localhost:${PORT}`);
+});
 
 app.use('/movies', moviesRouter);
 
