@@ -1,84 +1,75 @@
-import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
-const uri =
-  'mongodb+srv://user:???@cluster0.dhwmu.mongodb.net/?retryWrites=true&w=majority';
+import mysql from 'mysql2/promise';
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const config = {
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  port: 3306,
+  database: 'moviesdb',
+};
 
-async function connect() {
-  try {
-    await client.connect();
-    const database = client.db('database');
-    return database.collection('movies');
-  } catch (error) {
-    console.error('Error connecting to the database');
-    console.error(error);
-    await client.close();
-  }
-}
+const connection = await mysql.createConnection(config);
 
 export class MovieModel {
   static async getAll({ genre }) {
-    const db = await connect();
-
     if (genre) {
-      return db
-        .find({
-          genre: {
-            $elemMatch: {
-              $regex: genre,
-              $options: 'i',
-            },
-          },
-        })
-        .toArray();
+      const lowerCaseGenre = genre.toLowerCase();
+      const [genres] = await connection.query(
+        'SELECT id,name FROM genre WHERE LOWER(name)=? ',
+        [lowerCaseGenre]
+      );
+
+      if (genres.length === 0) return [];
+      const [{ id }] = genres;
+      return [];
     }
 
-    return db.find({}).toArray();
+    const [movies] = await connection.query(
+      'SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id FROM movie;'
+    );
+    return movies;
   }
 
   static async getById({ id }) {
-    const db = await connect();
-    const objectId = new ObjectId(id);
-    return db.findOne({ _id: objectId });
+    const [movies] = await connection.query(
+      'SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id FROM movie WHERE id=UUID_TO_BIN(?)',
+      [id]
+    );
+
+    if (movies.length === 0) return null;
+    return movies[0];
   }
 
   static async create({ input }) {
-    const db = await connect();
+    const {
+      genre: genreInput,
+      title,
+      year,
+      duration,
+      director,
+      rate,
+      poster,
+    } = input;
 
-    const { insertedId } = await db.insertOne(input);
-
-    return {
-      id: insertedId,
-      ...input,
-    };
-  }
-
-  static async delete({ id }) {
-    const db = await connect();
-    const objectId = new ObjectId(id);
-    const { deletedCount } = await db.deleteOne({ _id: objectId });
-    return deletedCount > 0;
-  }
-
-  static async update({ id, input }) {
-    const db = await connect();
-    const objectId = new ObjectId(id);
-
-    const { ok, value } = await db.findOneAndUpdate(
-      { _id: objectId },
-      { $set: input },
-      { returnNewDocument: true }
+    const [uuidResult] = await connection.query('SELECT UUID() as uuid');
+    const [{ uuid }] = uuidResult;
+    try {
+      await connection.query(
+        `INSERT INTO movie (id,title, year, duration, director, rate, poster) VALUES (UUID_TO_BIN("${uuid}"),?, ?, ?, ?, ?, ?)`,
+        [title, year, duration, director, rate, poster]
+      );
+    } catch (e) {
+      throw new Error('Error al insertar la pelicula');
+    }
+    const [movies] = await connection.query(
+      `SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id FROM movie WHERE id=UUID_TO_BIN(?);`,
+      [uuid]
     );
 
-    if (!ok) return false;
-
-    return value;
+    return movies[0];
   }
+
+  static async delete({ id }) {}
+
+  static async update({ id, input }) {}
 }
